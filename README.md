@@ -86,7 +86,7 @@ Verán un botón amarillo que dice "Compare & pull request".
 Asígnenme como revisor para que yo pueda validar y aprobar su trabajo.
 
 ⚠️ Notas importantes:
-Nunca hagan git push directo a develop o main.
+Nunca hagan git push directo a develop o main. 
 
 Si necesitan actualizar su rama con lo que otros han subido a develop, usen: git pull origin develop.
 
