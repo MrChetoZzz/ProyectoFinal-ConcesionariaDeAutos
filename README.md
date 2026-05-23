@@ -36,7 +36,9 @@ Cada vez que tengan una tarea asignada, sigan estos pasos:
 Si es la primera vez que clonan el repo:
 
 Bash
+
 git clone https://github.com/MrChetoZzz/Concesionaria-ABD.git
+
 git checkout develop
 
 -------------------------------------------------------------------
@@ -45,9 +47,13 @@ git checkout develop
 Siempre partan desde develop para tener la versión más reciente del código:
 
 Bash
+
 git checkout develop
+
 git pull origin develop
+
 git checkout -b feature/nombre-de-su-tarea
+
 (Ejemplo: git checkout -b feature/login-usuario)
 
 ------------------------------------------------------------------
@@ -57,7 +63,9 @@ Una vez terminen su código, guárdenlo siguiendo la convención: tipo: descripc
 
 Bash
 git add .
+
 git commit -m "feat: agregar validacion de contrasena en login"
+
 Tipos permitidos: feat, fix, docs, refactor, test, ci.
 
 -------------------------------------------------------------------
@@ -66,6 +74,7 @@ Tipos permitidos: feat, fix, docs, refactor, test, ci.
 Suban su rama al servidor:
 
 Bash
+
 git push origin feature/nombre-de-su-tarea
 
 Después de esto, entren a GitHub.
