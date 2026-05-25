@@ -90,3 +90,90 @@ Nunca hagan git push directo a develop o main.
 Si necesitan actualizar su rama con lo que otros han subido a develop, usen: git pull origin develop.
 
 Si tienen dudas con los comandos o surge un conflicto, avísenme antes de intentar resolverlo para evitar errores.
+
+
+
+~~~yml
+version: '3.8'
+
+  
+
+networks:
+
+  concesionaria-net:
+
+    driver: bridge
+
+  
+
+services:
+
+  # 1. BACKEND (Spring Boot)
+
+  backend:
+
+    build:
+
+      context: ./app
+
+      dockerfile: Dockerfile
+
+    container_name: concesionaria_backend
+
+    restart: on-failure
+
+    environment:
+
+      # Conexión a la base de datos local usando host.docker.internal
+
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://host.docker.internal:1433;databaseName=ConcesionariaTec;encrypt=true;trustServerCertificate=true;
+
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.SQLServerDialect
+
+    ports:
+
+      - "8080:8080"
+
+    networks:
+
+      - concesionaria-net
+
+  
+
+  # 2. FRONTEND (Vue.js)
+
+  frontend:
+
+    build:
+
+      context: ./frontend
+
+      dockerfile: Dockerfile
+
+    container_name: concesionaria_frontend
+
+    depends_on:
+
+      - backend
+
+    ports:
+
+      - "8081:80"
+
+    networks:
+
+      - concesionaria-net
+
+~~~
+
+Credenciales: 
+DB_PASSWORD=123
+
+DB_USER=Login_AppConcesionaria
+ 
