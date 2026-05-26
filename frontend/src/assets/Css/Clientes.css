@@ -1,0 +1,4 @@
+/* ---- CONTENEDOR PRINCIPAL: Sobrescribe max-width de Global.css ---- */
+.container {
+    max-width: 900px; 
+}
