@@ -90,8 +90,14 @@ public class VentaController {
     @PostMapping
     @Transactional
     public VentaDto registrarVenta(@RequestBody VentaRequest request) {
-        if (request.idCliente() == null || request.idVehiculo() == null || request.idTipoPago() == null) {
+        if (request == null || request.idCliente() == null || request.idVehiculo() == null || request.idTipoPago() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente, vehiculo y tipo de pago son obligatorios.");
+        }
+        if (!clienteActivo(request.idCliente())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente no encontrado o inactivo.");
+        }
+        if (!tipoPagoExiste(request.idTipoPago())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El tipo de pago no es valido.");
         }
         if (!vehiculoDisponible(request.idVehiculo())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El vehiculo no esta disponible para venta.");
@@ -99,7 +105,13 @@ public class VentaController {
 
         var costoTotal = request.costoTotal() != null ? request.costoTotal() : obtenerCostoVehiculo(request.idVehiculo());
         var monto = request.monto() != null ? request.monto() : costoTotal;
+        if (costoTotal.signum() < 0 || monto.signum() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Los importes de la venta no pueden ser negativos.");
+        }
         var idUsuario = request.idUsuario() != null ? request.idUsuario() : obtenerPrimerUsuarioActivo();
+        if (!usuarioActivo(idUsuario)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuario no encontrado o inactivo.");
+        }
         var fecha = request.fecha() != null ? request.fecha().atStartOfDay() : LocalDateTime.now();
         var keyHolder = new GeneratedKeyHolder();
 
@@ -209,6 +221,33 @@ public class VentaController {
               )
             """, Integer.class, idVehiculo);
         return disponibles != null && disponibles > 0;
+    }
+
+    private boolean clienteActivo(int idCliente) {
+        var total = jdbcTemplate.queryForObject(
+            "SELECT COUNT(1) FROM Cliente WHERE IdCliente = ? AND EstaActivo = 1",
+            Integer.class,
+            idCliente
+        );
+        return total != null && total > 0;
+    }
+
+    private boolean tipoPagoExiste(int idTipoPago) {
+        var total = jdbcTemplate.queryForObject(
+            "SELECT COUNT(1) FROM TipoPago WHERE IdTipoPago = ?",
+            Integer.class,
+            idTipoPago
+        );
+        return total != null && total > 0;
+    }
+
+    private boolean usuarioActivo(int idUsuario) {
+        var total = jdbcTemplate.queryForObject(
+            "SELECT COUNT(1) FROM Usuario WHERE IdUsuario = ? AND EstaActivo = 1",
+            Integer.class,
+            idUsuario
+        );
+        return total != null && total > 0;
     }
 
     private boolean existeVenta(int idVenta) {

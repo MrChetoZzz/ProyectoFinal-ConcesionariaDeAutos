@@ -5,10 +5,7 @@ export interface Cliente {
   nombreCompleto: string
   domicilio?: string
   activo: boolean
-}
-
-export interface ClienteFormData {
-  nombre: string
+  nombre?: string
   apellidoPaterno?: string
   apellidoMaterno?: string
   telefono?: string
@@ -16,6 +13,17 @@ export interface ClienteFormData {
   colonia?: string
   calle?: string
   numExt?: string
+}
+
+export interface ClienteFormData {
+  nombre: string
+  apellidoPaterno: string
+  apellidoMaterno: string
+  telefono: string
+  curp: string
+  colonia: string
+  calle: string
+  numExt: string
 }
 
 export const clientService = {

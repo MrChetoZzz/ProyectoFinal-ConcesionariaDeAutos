@@ -312,7 +312,6 @@ DENY CREATE TABLE TO Rol_AppConcesionaria;
 DENY CREATE PROCEDURE TO Rol_AppConcesionaria;
 DENY CREATE VIEW TO Rol_AppConcesionaria;
 DENY ALTER ON SCHEMA::dbo TO Rol_AppConcesionaria;
-DENY CONTROL ON SCHEMA::dbo TO Rol_AppConcesionaria;
 GO
 
 
@@ -513,6 +512,18 @@ INSERT INTO dbo.Persona (Nombre, FechaNacimiento, Domicilio) VALUES
 -- Clientes
 INSERT INTO dbo.Cliente (IdPersona) VALUES (1), (2), (3), (4), (5), (6), (7), (8), (9), (10);
 
+-- Completar campos editables de clientes para validar los formularios
+UPDATE dbo.Persona SET Nombre = N'Maria Guadalupe Hernandez Lopez', Domicilio = N'Calle: Hidalgo | Num. Ext.: 123 | Colonia: Centro | Tel.: 8671112233', CurpCifrada = CONVERT(varbinary(256), CONVERT(varchar(18), 'HELM850315MTSRPR01')), CurpHash = HASHBYTES('SHA2_256', 'HELM850315MTSRPR01') WHERE IdPersona = 1;
+UPDATE dbo.Persona SET Nombre = N'Juan Carlos Martinez Ruiz', Domicilio = N'Calle: Juarez | Num. Ext.: 456 | Colonia: Madero | Tel.: 8672223344', CurpCifrada = CONVERT(varbinary(256), CONVERT(varchar(18), 'MARJ900722HTSRZN02')), CurpHash = HASHBYTES('SHA2_256', 'MARJ900722HTSRZN02') WHERE IdPersona = 2;
+UPDATE dbo.Persona SET Nombre = N'Ana Patricia Gonzalez Flores', Domicilio = N'Calle: Colosio | Num. Ext.: 789 | Colonia: Las Torres | Tel.: 8673334455', CurpCifrada = CONVERT(varbinary(256), CONVERT(varchar(18), 'GOFA781130MTSNLR03')), CurpHash = HASHBYTES('SHA2_256', 'GOFA781130MTSNLR03') WHERE IdPersona = 3;
+UPDATE dbo.Persona SET Nombre = N'Roberto Carlos Sanchez Diaz', Domicilio = N'Calle: Morelos | Num. Ext.: 234 | Colonia: Guerrero | Tel.: 8674445566', CurpCifrada = CONVERT(varbinary(256), CONVERT(varchar(18), 'SADR950105HTSNZB04')), CurpHash = HASHBYTES('SHA2_256', 'SADR950105HTSNZB04') WHERE IdPersona = 4;
+UPDATE dbo.Persona SET Nombre = N'Laura Elena Ramirez Torres', Domicilio = N'Calle: Reforma | Num. Ext.: 567 | Colonia: Victoria | Tel.: 8675556677', CurpCifrada = CONVERT(varbinary(256), CONVERT(varchar(18), 'RATL880910MTSMRR05')), CurpHash = HASHBYTES('SHA2_256', 'RATL880910MTSMRR05') WHERE IdPersona = 5;
+UPDATE dbo.Persona SET Nombre = N'Miguel Angel Vazquez Castro', Domicilio = N'Calle: Mina | Num. Ext.: 890 | Colonia: Aduana | Tel.: 8676667788', CurpCifrada = CONVERT(varbinary(256), CONVERT(varchar(18), 'VACM820420HTSZSG06')), CurpHash = HASHBYTES('SHA2_256', 'VACM820420HTSZSG06') WHERE IdPersona = 6;
+UPDATE dbo.Persona SET Nombre = N'Sofia Alejandra Morales Vargas', Domicilio = N'Calle: Lazaro Cardenas | Num. Ext.: 345 | Colonia: Mirador | Tel.: 8677778899', CurpCifrada = CONVERT(varbinary(256), CONVERT(varchar(18), 'MOVS981212MTSRRF07')), CurpHash = HASHBYTES('SHA2_256', 'MOVS981212MTSRRF07') WHERE IdPersona = 7;
+UPDATE dbo.Persona SET Nombre = N'Pedro Luis Ortega Jimenez', Domicilio = N'Calle: Allende | Num. Ext.: 678 | Colonia: Hidalgo | Tel.: 8678889900', CurpCifrada = CONVERT(varbinary(256), CONVERT(varchar(18), 'OEJP750618HTSRMD08')), CurpHash = HASHBYTES('SHA2_256', 'OEJP750618HTSRMD08') WHERE IdPersona = 8;
+UPDATE dbo.Persona SET Nombre = N'Gabriela Ivonne Rios Mendoza', Domicilio = N'Calle: Universidad | Num. Ext.: 901 | Colonia: Tecnologico | Tel.: 8679990011', CurpCifrada = CONVERT(varbinary(256), CONVERT(varchar(18), 'RIMG920228MTSNSB09')), CurpHash = HASHBYTES('SHA2_256', 'RIMG920228MTSNSB09') WHERE IdPersona = 9;
+UPDATE dbo.Persona SET Nombre = N'Fernando Javier Cruz Navarro', Domicilio = N'Calle: Guerrero | Num. Ext.: 112 | Colonia: Juarez | Tel.: 8671011121', CurpCifrada = CONVERT(varbinary(256), CONVERT(varchar(18), 'CUNF871008HTSRVR10')), CurpHash = HASHBYTES('SHA2_256', 'CUNF871008HTSRVR10') WHERE IdPersona = 10;
+
 -- Mecánicos
 INSERT INTO dbo.Mecanico (IdPersona, IdEspecializacionMecanico) VALUES
 (11, 1), (12, 2), (13, 3), (14, 4), (15, 5);
@@ -539,6 +550,29 @@ INSERT INTO dbo.Vehiculo (Marca, Modelo, AnioModelo, Placas, NumeroSerie, Costo,
 (N'Dodge', N'Journey', 2024, N'BCD-7890', N'3C4PDCAB2H1234567', 550000.00, 2),
 (N'Ford', N'Escape', 2025, N'EFG-1234', N'1FMCU9J92H1234567', 670000.00, 1),
 (N'Ford', N'Explorer', 2024, N'HIJ-5678', N'1FM5K8D82H1234567', 920000.00, 1);
+
+-- Unidades adicionales para que el catalogo por marca muestre stock variado
+INSERT INTO dbo.Vehiculo (Marca, Modelo, AnioModelo, Placas, NumeroSerie, Costo, IdVehiculoCondicion) VALUES
+(N'Nissan', N'Versa', 2025, N'NVS-1001', N'NVERSA0000001001', 295000.00, 1),
+(N'Nissan', N'Versa', 2025, N'NVS-1002', N'NVERSA0000001002', 295000.00, 1),
+(N'Nissan', N'Sentra', 2024, N'NST-2001', N'NSENTRA000002001', 420000.00, 1),
+(N'Nissan', N'X-Trail', 2023, N'NXT-3001', N'NXTRAIL000003001', 580000.00, 2),
+(N'Nissan', N'X-Trail', 2023, N'NXT-3002', N'NXTRAIL000003002', 580000.00, 2),
+(N'Toyota', N'Corolla', 2025, N'TCR-4001', N'TCOROLLA0004001', 450000.00, 1),
+(N'Toyota', N'Corolla', 2025, N'TCR-4002', N'TCOROLLA0004002', 450000.00, 1),
+(N'Toyota', N'RAV4', 2024, N'TRV-5001', N'TRAV40000005001', 720000.00, 1),
+(N'Toyota', N'Hilux', 2023, N'THX-6001', N'THILUX000006001', 850000.00, 2),
+(N'Honda', N'Civic', 2025, N'HCV-7001', N'HCIVIC000007001', 480000.00, 1),
+(N'Honda', N'Civic', 2025, N'HCV-7002', N'HCIVIC000007002', 480000.00, 1),
+(N'Honda', N'Civic', 2025, N'HCV-7003', N'HCIVIC000007003', 480000.00, 1),
+(N'Honda', N'CR-V', 2024, N'HCR-8001', N'HCRV00000008001', 690000.00, 1),
+(N'Dodge', N'Attitude', 2025, N'DAT-9001', N'DATTITUDE009001', 310000.00, 1),
+(N'Dodge', N'Attitude', 2025, N'DAT-9002', N'DATTITUDE009002', 310000.00, 1),
+(N'Dodge', N'Journey', 2024, N'DJR-9101', N'DJOURNEY009101', 550000.00, 2),
+(N'Ford', N'Escape', 2025, N'FES-9201', N'FESCAPE00009201', 670000.00, 1),
+(N'Ford', N'Escape', 2025, N'FES-9202', N'FESCAPE00009202', 670000.00, 1),
+(N'Ford', N'Escape', 2025, N'FES-9203', N'FESCAPE00009203', 670000.00, 1),
+(N'Ford', N'Explorer', 2024, N'FEX-9301', N'FEXPLORER009301', 920000.00, 1);
 
 -- Ventas (Se ajustaron los IdUsuario del 1 al 4)
 INSERT INTO dbo.Venta (IdUsuario, IdCliente, IdVehiculo, IdVentaEstado, CostoTotal, FechaIngreso) VALUES

@@ -135,14 +135,23 @@ public class MecanicaController {
     @PostMapping("/reparaciones")
     @Transactional
     public ReparacionDto registrarReparacion(@RequestBody ReparacionRequest request) {
-        if (request.idCliente() == null || request.idVehiculo() == null || isBlank(request.descripcionProblema())) {
+        if (request == null || request.idCliente() == null || request.idVehiculo() == null || isBlank(request.descripcionProblema())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente, vehiculo y problema son obligatorios.");
         }
         if (request.costoEstimado() != null && request.costoEstimado().signum() < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El costo estimado no puede ser negativo.");
         }
+        if (request.fechaSalida() != null && request.fechaIngreso() != null && request.fechaSalida().isBefore(request.fechaIngreso())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de salida no puede ser anterior a la fecha de entrada.");
+        }
+        if (!vehiculoPerteneceACliente(request.idCliente(), request.idVehiculo())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El vehiculo no pertenece a una venta completada del cliente.");
+        }
 
         var idMecanico = request.idMecanico() != null ? request.idMecanico() : obtenerPrimerMecanicoActivo();
+        if (!mecanicoActivo(idMecanico)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mecanico no encontrado o inactivo.");
+        }
         var fechaIngreso = request.fechaIngreso() != null ? request.fechaIngreso().atStartOfDay() : LocalDateTime.now();
         var fechaSalida = request.fechaSalida() != null ? request.fechaSalida().atStartOfDay() : null;
         var keyHolder = new GeneratedKeyHolder();
@@ -195,6 +204,9 @@ public class MecanicaController {
         var clauses = new java.util.ArrayList<String>();
         var updates = new java.util.ArrayList<Object>();
         if (idMecanico != null) {
+            if (!mecanicoActivo(idMecanico)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mecanico no encontrado o inactivo.");
+            }
             clauses.add("IdMecanico = ?");
             updates.add(idMecanico);
         }
@@ -323,6 +335,26 @@ public class MecanicaController {
             }
             return rs.getInt("IdMecanico");
         });
+    }
+
+    private boolean vehiculoPerteneceACliente(int idCliente, int idVehiculo) {
+        var total = jdbcTemplate.queryForObject("""
+            SELECT COUNT(1)
+            FROM Venta
+            WHERE IdCliente = ?
+              AND IdVehiculo = ?
+              AND IdVentaEstado = 2
+            """, Integer.class, idCliente, idVehiculo);
+        return total != null && total > 0;
+    }
+
+    private boolean mecanicoActivo(int idMecanico) {
+        var total = jdbcTemplate.queryForObject(
+            "SELECT COUNT(1) FROM Mecanico WHERE IdMecanico = ? AND EstaActivo = 1",
+            Integer.class,
+            idMecanico
+        );
+        return total != null && total > 0;
     }
 
     private static boolean isBlank(String value) {

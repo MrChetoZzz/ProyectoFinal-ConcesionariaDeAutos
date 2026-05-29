@@ -15,6 +15,7 @@ import ClientesView from '@/views/ClientesView.vue'
 import MecanicaView from '@/views/MecanicaView.vue'
 import MarcasView from '@/views/MarcasView.vue'
 import ReportesView from '@/views/ReportesView.vue'
+import BitacoraReportesView from '@/views/BitacoraReportesView.vue'
 // ... otros imports
 
 const router = createRouter({
@@ -54,6 +55,11 @@ const router = createRouter({
       path: '/reportes',
       name: 'reportes',
       component: ReportesView
+    },
+    {
+      path: '/bitacora-reportes',
+      name: 'bitacora-reportes',
+      component: BitacoraReportesView
     }
     // ... más rutas
   ]

@@ -13,7 +13,15 @@ public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
             c.id,
             p.nombre,
             p.domicilio,
-            c.estaActivo
+            c.estaActivo,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
         )
         from Cliente c
         join c.persona p
