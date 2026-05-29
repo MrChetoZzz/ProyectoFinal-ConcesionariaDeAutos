@@ -34,7 +34,7 @@
                 <p class="card-text">Precio: {{ formatCurrency(vehiculo.costo) }}</p>
                 <p class="card-text">Estado: {{ vehiculo.condicion }}</p>
                 <p class="card-text">Anio: {{ vehiculo.anioModelo }}</p>
-                <p class="card-text">Disponibilidad: {{ vehiculo.disponible ? 'Disponible' : 'Vendido' }}</p>
+                <p class="card-text">Stock: {{ vehiculo.stock }} de {{ vehiculo.unidades }}</p>
               </div>
             </article>
           </section>
@@ -52,20 +52,10 @@ import FordLogo from '@/assets/Imagenes/Inicio/FordLogo.png'
 import HondaLogo from '@/assets/Imagenes/Inicio/Honda.png'
 import NissanLogo from '@/assets/Imagenes/Inicio/NissanLogo.png'
 import ToyotaLogo from '@/assets/Imagenes/Inicio/ToyotaLogo.png'
-
-interface Vehiculo {
-  id: number
-  marca: string
-  modelo: string
-  anioModelo: number
-  costo: number | null
-  condicion: string
-  disponible: boolean
-  imagenPrincipal?: string | null
-}
+import { vehiculoService, type VehiculoCatalogo } from '@/services/vehiculoService'
 
 const router = useRouter()
-const vehiculos = ref<Vehiculo[]>([])
+const vehiculos = ref<VehiculoCatalogo[]>([])
 const marcasBase = ['Nissan', 'Toyota', 'Dodge', 'Honda', 'Ford']
 const defaultLogo = ToyotaLogo
 const brandLogos: Record<string, string> = {
@@ -83,7 +73,7 @@ const marcasOrdenadas = computed(() => {
 
 const vehiculosPorMarca = (marca: string) => vehiculos.value.filter((vehiculo) => vehiculo.marca === marca)
 
-const formatCurrency = (amount: number | null) =>
+const formatCurrency = (amount?: number | null) =>
   Number(amount ?? 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })
 
 const obtenerRutaImagen = (vehiculo: Vehiculo) =>
@@ -99,8 +89,7 @@ const usarLogoFallback = (event: Event, marca: string) => {
 
 const cargarVehiculos = async () => {
   try {
-    const response = await fetch('/api/vehiculos?sort=Marca-Ascendente')
-    vehiculos.value = response.ok ? await response.json() : []
+    vehiculos.value = await vehiculoService.getCatalog({ sort: 'Marca-Ascendente' })
   } catch (error) {
     console.error('Error al cargar catalogo:', error)
     vehiculos.value = []

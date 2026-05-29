@@ -16,34 +16,34 @@
           </div>
           <div class="form-group">
             <label for="Apellido-Paterno">Apellido Paterno</label>
-            <input type="text" id="Apellido-Paterno" v-model.trim="form.apellidoPaterno">
+            <input type="text" id="Apellido-Paterno" v-model.trim="form.apellidoPaterno" required>
           </div>
           <div class="form-group">
             <label for="Apellido-Materno">Apellido Materno</label>
-            <input type="text" id="Apellido-Materno" v-model.trim="form.apellidoMaterno">
+            <input type="text" id="Apellido-Materno" v-model.trim="form.apellidoMaterno" required>
           </div>
           <div class="form-group">
             <label for="Telefono">Telefono</label>
-            <input type="text" id="Telefono" v-model.trim="form.telefono" placeholder="Ej. 8671234567" maxlength="10">
+            <input type="text" id="Telefono" v-model.trim="form.telefono" placeholder="Ej. 8671234567" maxlength="10" required>
           </div>
           <div class="form-group">
             <label for="Curp">CURP</label>
-            <input type="text" id="Curp" v-model.trim="form.curp">
+            <input type="text" id="Curp" v-model.trim="form.curp" maxlength="18" required @input="form.curp = form.curp.toUpperCase()">
           </div>
           <div class="form-group form-group-full">
             <hr class="form-divider">
           </div>
           <div class="form-group">
             <label for="Colonia">Colonia</label>
-            <input type="text" id="Colonia" v-model.trim="form.colonia">
+            <input type="text" id="Colonia" v-model.trim="form.colonia" required>
           </div>
           <div class="form-group">
             <label for="Calle">Calle</label>
-            <input type="text" id="Calle" v-model.trim="form.calle">
+            <input type="text" id="Calle" v-model.trim="form.calle" required>
           </div>
           <div class="form-group">
             <label for="Num-Ext">Numero Exterior</label>
-            <input type="number" id="Num-Ext" v-model.trim="form.numExt">
+            <input type="text" id="Num-Ext" v-model.trim="form.numExt" maxlength="12" required>
           </div>
           <div class="form-group form-group-full" id="btn-container">
             <button id="btnRegistrar" type="submit" class="btn btn-accent">Agregar Cliente</button>
@@ -101,34 +101,34 @@
           </div>
           <div class="form-group">
             <label for="Apellido-Paterno-Modal">Apellido Paterno</label>
-            <input type="text" id="Apellido-Paterno-Modal" v-model.trim="formEdicion.apellidoPaterno">
+            <input type="text" id="Apellido-Paterno-Modal" v-model.trim="formEdicion.apellidoPaterno" required>
           </div>
           <div class="form-group">
             <label for="Apellido-Materno-Modal">Apellido Materno</label>
-            <input type="text" id="Apellido-Materno-Modal" v-model.trim="formEdicion.apellidoMaterno">
+            <input type="text" id="Apellido-Materno-Modal" v-model.trim="formEdicion.apellidoMaterno" required>
           </div>
           <div class="form-group">
             <label for="Telefono-Modal">Telefono</label>
-            <input type="text" id="Telefono-Modal" v-model.trim="formEdicion.telefono" placeholder="Ej. 8671234567" maxlength="10">
+            <input type="text" id="Telefono-Modal" v-model.trim="formEdicion.telefono" placeholder="Ej. 8671234567" maxlength="10" required>
           </div>
           <div class="form-group">
             <label for="Curp-Modal">CURP</label>
-            <input type="text" id="Curp-Modal" v-model.trim="formEdicion.curp">
+            <input type="text" id="Curp-Modal" v-model.trim="formEdicion.curp" maxlength="18" required @input="formEdicion.curp = formEdicion.curp.toUpperCase()">
           </div>
           <div class="form-group form-group-full">
             <hr class="form-divider">
           </div>
           <div class="form-group">
             <label for="Colonia-Modal">Colonia</label>
-            <input type="text" id="Colonia-Modal" v-model.trim="formEdicion.colonia">
+            <input type="text" id="Colonia-Modal" v-model.trim="formEdicion.colonia" required>
           </div>
           <div class="form-group">
             <label for="Calle-Modal">Calle</label>
-            <input type="text" id="Calle-Modal" v-model.trim="formEdicion.calle">
+            <input type="text" id="Calle-Modal" v-model.trim="formEdicion.calle" required>
           </div>
           <div class="form-group">
             <label for="Num-Ext-Modal">Numero Exterior</label>
-            <input type="number" id="Num-Ext-Modal" v-model.trim="formEdicion.numExt">
+            <input type="text" id="Num-Ext-Modal" v-model.trim="formEdicion.numExt" maxlength="12" required>
           </div>
           <div class="form-group form-group-full form-group-btn">
             <button type="button" class="btn btn-cancel" @click="cerrarModalEdicion">Cancelar</button>
@@ -196,6 +196,42 @@ const limpiarFormulario = () => {
   })
 }
 
+const validarClienteForm = (datos: ClienteFormData) => {
+  const requeridos = [
+    datos.nombre,
+    datos.apellidoPaterno,
+    datos.apellidoMaterno,
+    datos.telefono,
+    datos.curp,
+    datos.colonia,
+    datos.calle,
+    datos.numExt,
+  ]
+
+  if (requeridos.some((valor) => !valor || !String(valor).trim())) {
+    mostrarMensaje('Completa todos los datos del cliente antes de guardar.', 'error')
+    return false
+  }
+
+  if (!/^\d{10}$/.test(datos.telefono || '')) {
+    mostrarMensaje('El telefono debe tener 10 digitos.', 'error')
+    return false
+  }
+
+  if (!/^[A-Z0-9]{18}$/.test((datos.curp || '').toUpperCase())) {
+    mostrarMensaje('La CURP debe tener exactamente 18 caracteres alfanumericos.', 'error')
+    return false
+  }
+
+  if ((datos.numExt || '').length > 12) {
+    mostrarMensaje('El numero exterior no puede exceder 12 caracteres.', 'error')
+    return false
+  }
+
+  datos.curp = datos.curp.toUpperCase()
+  return true
+}
+
 const fetchClientes = async () => {
   cargando.value = true
   try {
@@ -209,13 +245,13 @@ const fetchClientes = async () => {
 }
 
 const agregarCliente = async () => {
-  if (form.telefono && form.telefono.length !== 10) {
-    mostrarMensaje('El telefono debe tener 10 digitos.', 'error')
+  const datos = form as ClienteFormData
+  if (!validarClienteForm(datos)) {
     return
   }
 
   try {
-    await clientService.create(form as ClienteFormData)
+    await clientService.create(datos)
     mostrarMensaje('Cliente registrado correctamente.', 'success')
     limpiarFormulario()
     await fetchClientes()
@@ -225,17 +261,24 @@ const agregarCliente = async () => {
   }
 }
 
-const editarCliente = (cliente: Cliente) => {
-  clienteEnEdicion.value = cliente
+const editarCliente = async (cliente: Cliente) => {
+  try {
+    clienteEnEdicion.value = await clientService.getById(cliente.id)
+  } catch (error) {
+    console.error('Error al obtener cliente:', error)
+    clienteEnEdicion.value = cliente
+  }
+
+  const detalle = clienteEnEdicion.value
   Object.assign(formEdicion, {
-    nombre: cliente.nombreCompleto.split(' ')[0] || '',
-    apellidoPaterno: '',
-    apellidoMaterno: '',
-    telefono: '',
-    curp: '',
-    colonia: '',
-    calle: '',
-    numExt: '',
+    nombre: detalle?.nombre || '',
+    apellidoPaterno: detalle?.apellidoPaterno || '',
+    apellidoMaterno: detalle?.apellidoMaterno || '',
+    telefono: detalle?.telefono || '',
+    curp: detalle?.curp || '',
+    colonia: detalle?.colonia || '',
+    calle: detalle?.calle || '',
+    numExt: detalle?.numExt || '',
   })
   mostrarModalEdicion.value = true
 }
@@ -256,17 +299,17 @@ const cerrarModalEdicion = () => {
 }
 
 const guardarCliente = async () => {
-  if (formEdicion.telefono && formEdicion.telefono.length !== 10) {
-    mostrarMensaje('El telefono debe tener 10 digitos.', 'error')
+  const datos = formEdicion as ClienteFormData
+  if (!validarClienteForm(datos)) {
     return
   }
 
   try {
     if (clienteEnEdicion.value) {
-      await clientService.update(clienteEnEdicion.value.id, formEdicion as ClienteFormData)
+      await clientService.update(clienteEnEdicion.value.id, datos)
       mostrarMensaje('Cliente actualizado correctamente.', 'success')
     } else {
-      await clientService.create(formEdicion as ClienteFormData)
+      await clientService.create(datos)
       mostrarMensaje('Cliente registrado correctamente.', 'success')
     }
     cerrarModalEdicion()

@@ -37,3 +37,34 @@ export async function apiCall<T>(
     throw error
   }
 }
+
+export async function apiDownload(
+  endpoint: string,
+  options?: RequestInit
+): Promise<Blob> {
+  const url = `${API_BASE_URL}${endpoint}`
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+      ...options,
+    })
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      const error = new Error(
+        data.message || data.error || `HTTP ${response.status}`
+      ) as Error & { status?: number }
+      error.status = response.status
+      throw error
+    }
+
+    return response.blob()
+  } catch (error) {
+    console.error(`API download failed: ${endpoint}`, error)
+    throw error
+  }
+}

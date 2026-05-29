@@ -398,6 +398,56 @@ public class VehiculoController {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehiculo no encontrado."));
     }
 
+    @GetMapping("/catalogo")
+    public List<VehiculoCatalogoDto> listarCatalogo(
+        @RequestParam(required = false) String marca,
+        @RequestParam(required = false) String modelo,
+        @RequestParam(required = false) Integer anio,
+        @RequestParam(required = false, defaultValue = "Marca-Ascendente") String sort
+    ) {
+        var params = new MapSqlParameterSource()
+            .addValue("marca", blankToNull(marca))
+            .addValue("modelo", blankToNull(modelo))
+            .addValue("anio", anio);
+
+        return namedJdbc.query("""
+            SELECT
+                MIN(v.IdVehiculo) AS IdVehiculo,
+                v.Marca,
+                v.Modelo,
+                v.AnioModelo,
+                MIN(v.Costo) AS Costo,
+                v.IdVehiculoCondicion,
+                vc.DescripcionEs AS Condicion,
+                COUNT(1) AS Unidades,
+                SUM(CASE WHEN ventaVendida.IdVehiculo IS NULL THEN 1 ELSE 0 END) AS Stock,
+                MIN(vi.RutaImagen) AS ImagenPrincipal
+            FROM Vehiculo v
+            INNER JOIN VehiculoCondicion vc ON vc.IdVehiculoCondicion = v.IdVehiculoCondicion
+            LEFT JOIN VehiculoImagen vi ON vi.IdVehiculo = v.IdVehiculo AND vi.EsPrincipal = 1
+            LEFT JOIN (
+                SELECT DISTINCT IdVehiculo
+                FROM Venta
+                WHERE IdVentaEstado = 2
+            ) ventaVendida ON ventaVendida.IdVehiculo = v.IdVehiculo
+            WHERE (:marca IS NULL OR v.Marca = :marca)
+              AND (:modelo IS NULL OR v.Modelo = :modelo)
+              AND (:anio IS NULL OR v.AnioModelo = :anio)
+            GROUP BY v.Marca, v.Modelo, v.AnioModelo, v.IdVehiculoCondicion, vc.DescripcionEs
+            """ + catalogoOrderBy(sort), params, (rs, rowNum) -> new VehiculoCatalogoDto(
+                rs.getInt("IdVehiculo"),
+                rs.getString("Marca"),
+                rs.getString("Modelo"),
+                rs.getInt("AnioModelo"),
+                rs.getBigDecimal("Costo"),
+                rs.getInt("IdVehiculoCondicion"),
+                rs.getString("Condicion"),
+                rs.getInt("Unidades"),
+                rs.getInt("Stock"),
+                rs.getString("ImagenPrincipal")
+            ));
+    }
+
     @GetMapping("/marcas")
     public List<String> listarMarcas() {
         return jdbcTemplate.queryForList("SELECT DISTINCT Marca FROM Vehiculo ORDER BY Marca", String.class);
@@ -498,7 +548,7 @@ public class VehiculoController {
     }
 
     private static void validarVehiculoRequest(VehiculoRequest request) {
-        if (isBlank(request.marca()) || isBlank(request.modelo()) || request.anioModelo() == null) {
+        if (request == null || isBlank(request.marca()) || isBlank(request.modelo()) || request.anioModelo() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Marca, modelo y anio son obligatorios.");
         }
         if (request.anioModelo() < 1900 || request.anioModelo() > 2100) {
@@ -509,6 +559,12 @@ public class VehiculoController {
         }
         if (request.idVehiculoCondicion() != null && request.idVehiculoCondicion() != 1 && request.idVehiculoCondicion() != 2) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La condicion del vehiculo no es valida.");
+        }
+        if (!isBlank(request.numeroSerie()) && request.numeroSerie().trim().length() > 17) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El numero de serie no puede exceder 17 caracteres.");
+        }
+        if (!isBlank(request.placas()) && request.placas().trim().length() > 15) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Las placas no pueden exceder 15 caracteres.");
         }
     }
 
@@ -524,6 +580,21 @@ public class VehiculoController {
             Map.entry("Anio-Descendente", "v.AnioModelo DESC"),
             Map.entry("Año-Ascendente", "v.AnioModelo ASC"),
             Map.entry("Año-Descendente", "v.AnioModelo DESC")
+        ).getOrDefault(sort, "v.Marca ASC, v.Modelo ASC");
+    }
+
+    private static String catalogoOrderBy(String sort) {
+        return " ORDER BY " + Map.ofEntries(
+            Map.entry("Marca-Ascendente", "v.Marca ASC, v.Modelo ASC"),
+            Map.entry("Marca-Descendente", "v.Marca DESC, v.Modelo ASC"),
+            Map.entry("Modelo-Ascendente", "v.Modelo ASC"),
+            Map.entry("Modelo-Descendente", "v.Modelo DESC"),
+            Map.entry("Precio-Ascendente", "MIN(v.Costo) ASC"),
+            Map.entry("Precio-Descendente", "MIN(v.Costo) DESC"),
+            Map.entry("Anio-Ascendente", "v.AnioModelo ASC"),
+            Map.entry("Anio-Descendente", "v.AnioModelo DESC"),
+            Map.entry("AÃ±o-Ascendente", "v.AnioModelo ASC"),
+            Map.entry("AÃ±o-Descendente", "v.AnioModelo DESC")
         ).getOrDefault(sort, "v.Marca ASC, v.Modelo ASC");
     }
 
@@ -552,6 +623,20 @@ public class VehiculoController {
         LocalDateTime fechaRegistro,
         Boolean disponible,
         String imagenPrincipal 
+    ) {
+    }
+
+    public record VehiculoCatalogoDto(
+        Integer id,
+        String marca,
+        String modelo,
+        Integer anioModelo,
+        BigDecimal costo,
+        Integer idVehiculoCondicion,
+        String condicion,
+        Integer unidades,
+        Integer stock,
+        String imagenPrincipal
     ) {
     }
 

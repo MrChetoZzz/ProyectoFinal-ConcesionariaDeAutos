@@ -141,6 +141,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { mecanicoService } from '@/services/mecanicoService'
+import { clientService } from '@/services/clientService'
 
 interface Cliente {
   id: number
@@ -202,7 +203,7 @@ const formatDate = (value: string) => value ? new Date(value).toLocaleDateString
 
 const cargarClientes = async () => {
   try {
-    clientes.value = await fetch('/api/clientes').then(r => r.json())
+    clientes.value = await clientService.getAll()
   } catch (error) {
     console.error('Error al cargar clientes:', error)
     mostrarMensaje('Error al cargar clientes.', 'error')
@@ -273,10 +274,19 @@ const registrarReparacion = async () => {
     return
   }
 
+  const idCliente = form.idCliente
+  const idVehiculo = form.idVehiculo
+
   try {
     await mecanicoService.createRepair({
-      ...form,
+      idCliente,
+      idVehiculo,
+      idMecanico: form.idMecanico,
+      fechaIngreso: form.fechaIngreso,
       fechaSalida: form.fechaSalida || null,
+      descripcionProblema: form.descripcionProblema,
+      diagnosticoInicial: form.diagnosticoInicial,
+      costoEstimado: form.costoEstimado,
     })
     mostrarMensaje('Reparacion registrada correctamente.', 'success')
     limpiarFormulario()

@@ -5,13 +5,26 @@ export interface Vehiculo {
   marca: string
   modelo: string
   anioModelo: number
-  placas?: string
-  numeroSerie?: string
-  costo?: number
+  placas?: string | null
+  numeroSerie?: string | null
+  costo?: number | null
   idVehiculoCondicion: number
   condicion: string
   fechaRegistro: string
   disponible: boolean
+  imagenPrincipal?: string | null
+}
+
+export interface VehiculoCatalogo {
+  id: number
+  marca: string
+  modelo: string
+  anioModelo: number
+  costo?: number | null
+  idVehiculoCondicion: number
+  condicion: string
+  unidades: number
+  stock: number
   imagenPrincipal?: string | null
 }
 
@@ -47,6 +60,17 @@ export const vehiculoService = {
   // GET single vehicle
   async getById(id: number): Promise<Vehiculo> {
     return apiCall<Vehiculo>(`/vehiculos/${id}`)
+  },
+
+  // GET catalog grouped by vehicle line with stock count
+  async getCatalog(filters?: VehiculoFilters): Promise<VehiculoCatalogo[]> {
+    const params = new URLSearchParams()
+    if (filters?.sort) params.set('sort', filters.sort)
+    if (filters?.marca) params.set('marca', filters.marca)
+    if (filters?.modelo) params.set('modelo', filters.modelo)
+    if (filters?.anio) params.set('anio', String(filters.anio))
+
+    return apiCall<VehiculoCatalogo[]>(`/vehiculos/catalogo?${params}`)
   },
 
   // GET brands

@@ -104,14 +104,17 @@
           <form id="Form-Agregar-Nuevo-Vehiculo" class="form-grid" @submit.prevent="guardarVehiculo">
             <div class="form-group">
               <label for="MarcaANV">Marca</label>
-              <select id="MarcaANV" v-model="nuevoVehiculo.marca" required>
+              <select id="MarcaANV" v-model="nuevoVehiculo.marca" required @change="nuevoVehiculo.modelo = ''">
                 <option value="" disabled>Seleccione una marca</option>
                 <option v-for="marca in marcasBase" :key="marca" :value="marca">{{ marca }}</option>
               </select>
             </div>
             <div class="form-group">
               <label for="ModeloANV">Modelo</label>
-              <input type="text" id="ModeloANV" v-model.trim="nuevoVehiculo.modelo" required>
+              <select id="ModeloANV" v-model="nuevoVehiculo.modelo" :disabled="!nuevoVehiculo.marca" required>
+                <option value="" disabled>Seleccione un modelo</option>
+                <option v-for="modelo in modelosFormulario" :key="modelo" :value="modelo">{{ modelo }}</option>
+              </select>
             </div>
             <div class="form-group">
               <label for="AnioANV">Anio</label>
@@ -154,20 +157,6 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { vehiculoService, type Vehiculo, type VehiculoFormData } from '@/services/vehiculoService'
 
-interface Vehiculo {
-  id: number
-  marca: string
-  modelo: string
-  anioModelo: number
-  placas: string | null
-  numeroSerie: string | null
-  costo: number | null
-  idVehiculoCondicion: number
-  condicion: string
-  fechaRegistro: string
-  disponible: boolean
-}
-
 const router = useRouter()
 const vehiculos = ref<Vehiculo[]>([])
 const marcas = ref<string[]>([])
@@ -181,7 +170,21 @@ const vehiculoEnEdicion = ref<Vehiculo | null>(null)
 
 const marcasBase = computed(() => {
   const base = ['Toyota', 'Ford', 'Nissan', 'Dodge', 'Honda']
-  return Array.from(new Set([...base, ...marcas.value])).sort()
+  return base.sort()
+})
+
+const modelosBasePorMarca: Record<string, string[]> = {
+  Dodge: ['Attitude', 'Journey', 'Durango', 'Charger'],
+  Ford: ['Escape', 'Explorer', 'F-150', 'Mustang'],
+  Honda: ['Civic', 'CR-V', 'Accord', 'HR-V'],
+  Nissan: ['Versa', 'Sentra', 'X-Trail', 'Kicks'],
+  Toyota: ['Corolla', 'RAV4', 'Hilux', 'Camry'],
+}
+
+const modelosFormulario = computed(() => {
+  const marca = nuevoVehiculo.marca
+  if (!marca) return []
+  return [...(modelosBasePorMarca[marca] || [])].sort()
 })
 
 const anios = computed(() => {
@@ -205,7 +208,7 @@ const nuevoVehiculo = reactive({
   numeroSerie: '',
 })
 
-const formatCurrency = (amount: number | null) =>
+const formatCurrency = (amount?: number | null) =>
   (amount ?? 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })
 
 const mostrarMensaje = (texto: string, tipo: 'success' | 'error' | 'info' = 'info') => {
@@ -228,6 +231,10 @@ const cargarModelos = async (marca: string) => {
   filtros.modelo = ''
   if (!marca) {
     modelosBusqueda.value = []
+    return
+  }
+  if (modelosBasePorMarca[marca]) {
+    modelosBusqueda.value = [...modelosBasePorMarca[marca]].sort()
     return
   }
   try {

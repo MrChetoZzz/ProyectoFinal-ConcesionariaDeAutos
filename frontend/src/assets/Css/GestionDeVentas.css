@@ -23,3 +23,62 @@
     flex-shrink: 0; /* Asegura que la etiqueta no se comprima */
 }
 
+#comprobante-print-area {
+    display: none;
+}
+
+body.printing-comprobante #comprobante-print-area {
+    display: block;
+}
+
+@media print {
+    body.printing-comprobante * {
+        visibility: hidden !important;
+    }
+
+    body.printing-comprobante #comprobante-print-area,
+    body.printing-comprobante #comprobante-print-area * {
+        visibility: visible !important;
+    }
+
+    body.printing-comprobante #comprobante-print-area {
+        display: block !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 24px;
+        background: #fff;
+        color: #111;
+    }
+
+    body.printing-comprobante .print-comprobante-header {
+        border-bottom: 2px solid #111;
+        margin-bottom: 18px;
+        padding-bottom: 10px;
+        text-align: center;
+    }
+
+    body.printing-comprobante .print-comprobante {
+        border: 1px solid #d0d5dd;
+        margin-bottom: 16px;
+        padding: 16px;
+        page-break-inside: avoid;
+    }
+
+    body.printing-comprobante .print-row,
+    body.printing-comprobante .print-total {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 8px 0;
+        border-bottom: 1px solid #eaecf0;
+    }
+
+    body.printing-comprobante .print-total {
+        border-bottom: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+}
+

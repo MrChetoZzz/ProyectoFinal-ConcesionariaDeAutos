@@ -8,6 +8,7 @@
           <li v-if="user.rol === 'admin'" class="lista-de-opciones"><router-link to="/gestion-vehiculos">Gestion de Vehiculos</router-link></li>
           <li v-if="['admin', 'vendedor'].includes(user.rol)" class="lista-de-opciones"><router-link to="/ventas">Ventas</router-link></li>
           <li v-if="user.rol === 'admin'" class="lista-de-opciones"><router-link to="/reportes">Reportes</router-link></li>
+          <li v-if="user.rol === 'admin'" class="lista-de-opciones"><router-link to="/bitacora-reportes">Bitacora</router-link></li>
           <li v-if="['admin', 'mecanico'].includes(user.rol)" class="lista-de-opciones"><router-link to="/mecanica">Mecanica</router-link></li>
           <li v-if="['admin', 'vendedor'].includes(user.rol)" class="lista-de-opciones"><router-link to="/clientes">Clientes</router-link></li>
         </template>
@@ -24,14 +25,37 @@
     <section id="Mas-Auto" class="inicio-hero animate__animated animate__fadeInDown">
       <div id="Mas-Auto-Informacion" class="hero-copy">
         <h1>ALAFE</h1>
+        <p class="hero-kicker">Concesionaria y taller en una sola operacion</p>
+        <p class="hero-subtitle">
+          Administra inventario, ventas, clientes y reparaciones desde un panel rapido para el equipo.
+        </p>
+        <div v-if="user.isLoggedIn" class="session-pill">Sesion activa: {{ displayRol }}</div>
         <div class="hero-actions">
           <router-link :to="rutaPrincipal" id="Ver-mas" class="btn btn-accent">{{ textoAccionPrincipal }}</router-link>
           <router-link to="/marcas" class="btn btn-ghost">Ver catalogo</router-link>
+        </div>
+        <div class="hero-metrics" aria-label="Resumen operativo">
+          <div>
+            <strong>5</strong>
+            <span>Marcas</span>
+          </div>
+          <div>
+            <strong>24/7</strong>
+            <span>Catalogo</span>
+          </div>
+          <div>
+            <strong>SQL</strong>
+            <span>Datos vivos</span>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="brand-strip" aria-label="Marcas disponibles">
+      <div class="brand-strip-title">
+        <span>Catalogo disponible</span>
+        <strong>Autos listos para vender y dar seguimiento</strong>
+      </div>
       <img src="@/assets/Imagenes/Inicio/NissanLogo.png" alt="Nissan">
       <img src="@/assets/Imagenes/Inicio/ToyotaLogo.png" alt="Toyota">
       <img src="@/assets/Imagenes/Inicio/FordLogo.png" alt="Ford">
@@ -77,6 +101,12 @@ const rutaPrincipal = computed(() => {
 })
 
 const textoAccionPrincipal = computed(() => user.isLoggedIn ? 'Ir al panel' : 'Explorar autos')
+const displayRol = computed(() => {
+  if (user.rol === 'admin') return 'Administrador'
+  if (user.rol === 'vendedor') return 'Vendedor'
+  if (user.rol === 'mecanico') return 'Mecanico'
+  return 'Invitado'
+})
 
 const toggleLoginModal = () => {
   showLoginModal.value = !showLoginModal.value

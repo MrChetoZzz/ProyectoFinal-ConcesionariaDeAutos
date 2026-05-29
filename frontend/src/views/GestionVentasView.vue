@@ -65,18 +65,18 @@
           <div class="filtro-group" id="comprobante-controls">
             <label for="Filtrar">Filtrar por:</label>
             <select id="Filtrar" v-model="sort" @change="cargarVentas">
-              <option value="Folio-Ascendente">Folio ▲</option>
-              <option value="Folio-Descendente">Folio ▼</option>
-              <option value="Nombre-Ascendente">Nombre de Cliente ▲</option>
-              <option value="Nombre-Descendente">Nombre de Cliente ▼</option>
-              <option value="Marca-Ascendente">Marca ▲</option>
-              <option value="Marca-Descendente">Marca ▼</option>
-              <option value="Modelo-Ascendente">Modelo ▲</option>
-              <option value="Modelo-Descendente">Modelo ▼</option>
-              <option value="Precio-Ascendente">Precio ▲</option>
-              <option value="Precio-Descendente">Precio ▼</option>
-              <option value="Fecha-Ascendente">Fecha ▲</option>
-              <option value="Fecha-Descendente">Fecha ▼</option>
+              <option value="Folio-Ascendente">Folio ascendente</option>
+              <option value="Folio-Descendente">Folio descendente</option>
+              <option value="Nombre-Ascendente">Cliente ascendente</option>
+              <option value="Nombre-Descendente">Cliente descendente</option>
+              <option value="Marca-Ascendente">Marca ascendente</option>
+              <option value="Marca-Descendente">Marca descendente</option>
+              <option value="Modelo-Ascendente">Modelo ascendente</option>
+              <option value="Modelo-Descendente">Modelo descendente</option>
+              <option value="Precio-Ascendente">Precio ascendente</option>
+              <option value="Precio-Descendente">Precio descendente</option>
+              <option value="Fecha-Ascendente">Fecha ascendente</option>
+              <option value="Fecha-Descendente">Fecha descendente</option>
             </select>
             <button type="button" class="btn btn-accent" @click="abrirComprobante">Generar Comprobante</button>
           </div>
@@ -174,9 +174,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ventaService, type VentaFormData } from '@/services/ventaService'
+import { clientService } from '@/services/clientService'
+import { vehiculoService } from '@/services/vehiculoService'
+import { apiCall } from '@/services/api'
 
 interface Cliente {
   id: number
@@ -187,7 +190,7 @@ interface Vehiculo {
   id: number
   marca: string
   modelo: string
-  costo: number | null
+  costo?: number | null
   disponible: boolean
 }
 
@@ -228,23 +231,43 @@ const form = reactive({
 const vehiculosDisponibles = computed(() => vehiculos.value.filter((vehiculo) => vehiculo.disponible))
 const vehiculoSeleccionado = computed(() => vehiculos.value.find((vehiculo) => vehiculo.id === form.idVehiculo))
 const comprobantes = computed(() => ventas.value.filter((venta) => ventasSeleccionadas.value.includes(venta.id)))
+const PRINT_CLASS = 'printing-comprobante'
 
-const formatCurrency = (amount: number | null) =>
+const formatCurrency = (amount?: number | null) =>
   Number(amount ?? 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })
 
 const formatDate = (value: string) => value ? new Date(value).toLocaleDateString('es-MX') : ''
-const PRINT_CLASS = 'printing-comprobante'
 
 const limpiarModoImpresion = () => {
   document.body.classList.remove(PRINT_CLASS)
 }
 
-const imprimir = () => {
+const registrarBitacoraComprobante = async () => {
+  try {
+    await apiCall('/bitacora/reportes-descargados', {
+      method: 'POST',
+      body: JSON.stringify({
+        idReporte: 'comprobante-ventas',
+        nombreReporte: 'ComprobanteVenta',
+        formato: 'PDF',
+        filtrosUsados: {
+          ventasSeleccionadas: comprobantes.value.map((venta) => venta.id).join(', '),
+          cantidad: comprobantes.value.length,
+        },
+      }),
+    })
+  } catch (error) {
+    console.error('Error al registrar bitacora del comprobante:', error)
+  }
+}
+
+const imprimir = async () => {
   if (comprobantes.value.length === 0) {
     mostrarMensaje('Selecciona al menos una venta para imprimir el comprobante.', 'info')
     return
   }
 
+  await registrarBitacoraComprobante()
   document.body.classList.add(PRINT_CLASS)
 
   const limpiarDespuesDeImprimir = () => {
@@ -269,16 +292,16 @@ const mostrarMensaje = (texto: string, tipo: 'success' | 'error' | 'info' = 'inf
 const cargarCatalogos = async () => {
   try {
     const [clientesData, vehiculosData, tiposPagoData] = await Promise.all([
-      fetch('/api/clientes').then(r => r.json()),
-      fetch('/api/vehiculos?sort=Marca-Ascendente').then(r => r.json()),
-      fetch('/api/ventas/tipos-pago').then(r => r.json()),
+      clientService.getAll(),
+      vehiculoService.getAll({ sort: 'Marca-Ascendente' }),
+      ventaService.getPaymentTypes(),
     ])
     clientes.value = clientesData || []
     vehiculos.value = vehiculosData || []
     tiposPago.value = tiposPagoData || []
   } catch (error) {
-    console.error('Error al cargar catálogos:', error)
-    mostrarMensaje('Error al cargar los catálogos.', 'error')
+    console.error('Error al cargar catalogos:', error)
+    mostrarMensaje('Error al cargar los catalogos.', 'error')
   }
 }
 
@@ -313,7 +336,7 @@ const registrarVenta = async () => {
       idVehiculo: form.idVehiculo,
       idTipoPago: form.idTipoPago,
       fecha: form.fecha,
-      monto: form.monto || vehiculoSeleccionado.value?.costo,
+      monto: form.monto ?? vehiculoSeleccionado.value?.costo ?? undefined,
     }
     await ventaService.create(datos)
     mostrarMensaje('Venta registrada correctamente.', 'success')
@@ -334,10 +357,11 @@ const abrirComprobante = () => {
 }
 
 const eliminarVenta = async (id: number) => {
-  if (!confirm('¿Deseas eliminar esta venta?')) return
+  if (!confirm('Deseas eliminar esta venta?')) return
 
   try {
     await ventaService.delete(id)
+    ventasSeleccionadas.value = ventasSeleccionadas.value.filter((ventaId) => ventaId !== id)
     mostrarMensaje('Venta eliminada correctamente.', 'success')
     await cargarVentas()
   } catch (error) {
@@ -373,4 +397,56 @@ onMounted(async () => {
   color: #0A2E5E;
 }
 </style>
- 
+
+<style>
+@media print {
+  body.printing-comprobante * {
+    visibility: hidden !important;
+  }
+
+  body.printing-comprobante #comprobante-print-area,
+  body.printing-comprobante #comprobante-print-area * {
+    visibility: visible !important;
+  }
+
+  body.printing-comprobante #comprobante-print-area {
+    display: block !important;
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    padding: 24px;
+    background: #fff;
+    color: #111;
+  }
+
+  body.printing-comprobante .print-comprobante-header {
+    border-bottom: 2px solid #111;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    text-align: center;
+  }
+
+  body.printing-comprobante .print-comprobante {
+    border: 1px solid #d0d5dd;
+    margin-bottom: 16px;
+    padding: 16px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  body.printing-comprobante .print-row,
+  body.printing-comprobante .print-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 8px 0;
+    border-bottom: 1px solid #eaecf0;
+  }
+
+  body.printing-comprobante .print-total {
+    border-bottom: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+}
+</style>
