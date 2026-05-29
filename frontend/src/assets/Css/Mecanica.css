@@ -1,0 +1,74 @@
+
+/* ---- CONTENEDOR PRINCIPAL: Sobrescribe max-width de Global.css ---- */
+.container {
+    max-width: 1000px;
+}
+
+/* ---- FORMULARIO (GRID) ---- */
+#Forma-Registrar-Nueva-Reparacion {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px 25px;
+    align-items: end;
+}
+
+.form-group-mecanica { 
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-mecanica label {
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.vehiculo-selects {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    margin-top: 5px;
+}
+.vehiculo-selects select {
+    flex: 1;
+}
+
+.button-group-full {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* ---- ESTILOS DE BOTONES DE ACCIÓN EN TABLA ---- */
+/* Nota: Las clases .table-action-btn, .btn-completar, .btn-detalle se mantienen
+   aquí ya que son específicos de la funcionalidad de tabla/mecánica. */
+.table-action-btn {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+    transition: all 0.2s ease; 
+    border: none;
+    font-weight: 600;
+}
+
+.btn-completar {
+    background-color: #0A2E5E; 
+    color: white;
+}
+
+.btn-completar:hover {
+    background-color: #072244; 
+    transform: scale(1.05); 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.btn-detalle {
+    background-color: #DEC521;
+    color: #333;
+}
+.btn-detalle:hover {
+    background-color: #B6A11B;
+}

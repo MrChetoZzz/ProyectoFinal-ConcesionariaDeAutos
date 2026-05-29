@@ -1,0 +1,69 @@
+.page-grid {
+    display: grid;
+    grid-template-columns: 250px 1fr; 
+    gap: 30px;
+    max-width: 1300px; 
+    margin: 30px auto;
+    padding: 0 20px;
+    align-items: start; 
+}
+
+/* 2. ESTILOS DE LA BARRA LATERAL (ASIDE) */
+.lateral-container {
+    background-color: #F8F8F8; 
+    border-radius: 15px;
+    padding: 20px 0; 
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    position: sticky; 
+    top: 120px; 
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+}
+
+.lateral-container h3 {
+    color: #0A2E5E;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-bottom: 3px solid #DEC521; 
+    padding: 0 20px 10px 20px;
+    margin-bottom: 15px;
+}
+
+.aside-link {
+    color: #333;
+    padding: 12px 20px;
+    font-weight: 500;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    border-left: 5px solid transparent;
+}
+
+.aside-link:hover {
+    background-color: #E6EBF0; 
+    color: #0A2E5E; 
+    transform: translateX(3px);
+    border-left: 5px solid #DEC521; 
+}
+
+.aside-link.active {
+    background-color: #0A2E5E; 
+    color: white;
+    font-weight: 700;
+    border-left: 5px solid #DEC521; 
+}
+
+.container-tab{
+    display: none; 
+}
+
+.container-tab.active {
+    display: block; 
+    padding: 20px; 
+    margin-bottom: 25px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    width: 100%;
+}

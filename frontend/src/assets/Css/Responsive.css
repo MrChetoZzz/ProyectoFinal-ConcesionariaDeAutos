@@ -1,0 +1,184 @@
+/* ========================================= */
+/* ESTILOS RESPONSIVOS (MÓVIL)          */
+/* ========================================= */
+
+/* Breakpoint para Tablets y Móviles (menos de 1024px) */
+@media (max-width: 1024px) {
+    
+    /* ---- ENCABEZADO ---- */
+    #Encabezado {
+        height: auto; /* Permite que crezca */
+        flex-direction: column; /* Elementos uno debajo del otro */
+        padding: 15px;
+        gap: 10px;
+    }
+
+    #Titulo-Pag {
+        font-size: 1.8rem; /* Texto un poco más pequeño */
+        text-align: center;
+        order: 2; /* Poner título debajo del botón regresar si se desea */
+        margin: 10px 0;
+    }
+
+    #return {
+        align-self: flex-start; /* Botón a la izquierda */
+        margin-bottom: -40px; /* Truco para que quede en la misma línea visualmente si hay espacio */
+        z-index: 10;
+    }
+    
+    .header-spacer {
+        display: none; /* Ya no necesitamos el espaciador en móvil */
+    }
+
+    /* ---- INICIO (Menú de Navegación) ---- */
+    #lista-de-opciones {
+        display: flex;
+        flex-direction: column; /* Menú vertical */
+        gap: 5px;
+        padding-bottom: 15px;
+    }
+    
+    .lista-de-opciones {
+        margin: 5px 0;
+        width: 100%;
+        background-color: rgba(255,255,255,0.1); /* Fondo sutil para separar items */
+        border-radius: 8px;
+    }
+    
+    /* ---- PÁGINA DE MARCAS (Layout) ---- */
+    .page-grid {
+        grid-template-columns: 1fr; /* Una sola columna */
+    }
+
+    /* Convertir el ASIDE lateral en un menú superior deslizable */
+    .lateral-container {
+        position: relative;
+        top: 0;
+        width: 100%;
+        flex-direction: row; /* Horizontal */
+        overflow-x: auto; /* Scroll horizontal */
+        padding: 10px;
+        white-space: nowrap; /* Evita que los links bajen de línea */
+        border-bottom: 2px solid #ddd;
+        background: white;
+    }
+
+    .lateral-container h3 {
+        display: none; /* Ocultamos el título "Marcas" para ahorrar espacio */
+    }
+
+    .aside-link {
+        padding: 8px 15px;
+        border-left: none;
+        border-bottom: 3px solid transparent; /* Borde abajo en vez de al lado */
+        border-radius: 5px;
+        background-color: #f0f0f0;
+        margin-right: 10px;
+    }
+
+    .aside-link.active, .aside-link:hover {
+        border-left: none;
+        border-bottom: 3px solid #DEC521;
+        transform: none;
+    }
+    
+    /* Ajuste de tarjetas de autos */
+    .marca-section {
+        justify-content: center; /* Centrar tarjetas */
+        padding: 10px;
+    }
+    
+    .card {
+        width: 100% !important; /* Tarjeta ocupa todo el ancho disponible */
+        max-width: 350px; /* Pero no más de esto */
+        height: auto; /* Altura automática */
+    }
+    
+    .card-img-top {
+        height: 200px; /* Imagen un poco más alta para verse bien */
+    }
+}
+
+/* Breakpoint para Móviles Pequeños (menos de 768px) */
+@media (max-width: 768px) {
+
+    /* ---- CONTENEDORES ---- */
+    .container {
+        padding: 0 15px;
+        margin-top: 15px;
+    }
+
+    .card-section {
+        padding: 20px 15px; /* Menos padding interno */
+    }
+
+    /* ---- FORMULARIOS ---- */
+    .form-grid {
+        grid-template-columns: 1fr; /* FORZAR UNA SOLA COLUMNA */
+        gap: 15px;
+    }
+    
+    /* Ajustes específicos para Mecánica */
+    #Forma-Registrar-Nueva-Reparacion {
+        grid-template-columns: 1fr;
+    }
+    
+    .vehiculo-selects {
+        flex-direction: column; /* Selects de marca/modelo uno bajo otro */
+        align-items: stretch;
+    }
+
+    /* ---- BOTONES ---- */
+    .btn {
+        width: 100%; /* Botones ocupan todo el ancho */
+        margin-bottom: 10px;
+    }
+    
+    #Contenedor-Botones, 
+    .button-group-full {
+        flex-direction: column-reverse; /* Botón principal arriba */
+        gap: 10px;
+    }
+
+    /* ---- FILTROS Y BÚSQUEDA ---- */
+    .filtro-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    #Filtrar {
+        width: 100%;
+    }
+
+    /* ---- MODALES ---- */
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+        margin: 10px;
+        max-height: 90vh; /* Evita que se salga de la pantalla verticalmente */
+        overflow-y: auto; /* Scroll interno si es muy alto */
+    }
+    
+    .comprobante-nav-container {
+        gap: 8px;
+    }
+    
+    .nav-comprobante-btn {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+        flex-grow: 1; /* Botones se estiran para llenar espacio */
+        text-align: center;
+    }
+    
+    /* ---- TOASTS ---- */
+    #toast-container {
+        left: 20px; /* Centrado en móvil */
+        right: 20px;
+        top: 20px;
+    }
+    
+    .toast {
+        width: 100%;
+        min-width: 0;
+    }
+}
