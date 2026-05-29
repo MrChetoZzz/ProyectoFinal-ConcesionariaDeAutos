@@ -110,7 +110,7 @@
                   <td>{{ formatCurrency(venta.costoTotal) }}</td>
                   <td>{{ venta.estado }}</td>
                   <td>
-                    <button class="table-action-btn delete-btn" @click="eliminarVenta(venta.id)" title="Eliminar venta">Eliminar</button>
+                    <button class="table-action-btn delete-btn" @click="eliminarVenta(venta.id)" title="Cancelar venta">Cancelar</button>
                   </td>
                 </tr>
               </tbody>
@@ -141,11 +141,40 @@
         </div>
       </div>
     </div>
+
+    <section id="comprobante-print-area" aria-hidden="true">
+      <header class="print-comprobante-header">
+        <h1>Comprobante de Venta</h1>
+        <p>ALAFE</p>
+      </header>
+      <article v-for="venta in comprobantes" :key="`print-${venta.id}`" class="print-comprobante">
+        <div class="print-row">
+          <span>Folio</span>
+          <strong>{{ venta.id }}</strong>
+        </div>
+        <div class="print-row">
+          <span>Fecha</span>
+          <strong>{{ formatDate(venta.fecha) }}</strong>
+        </div>
+        <div class="print-row">
+          <span>Cliente</span>
+          <strong>{{ venta.cliente }}</strong>
+        </div>
+        <div class="print-row">
+          <span>Vehiculo</span>
+          <strong>{{ venta.marca }} {{ venta.modelo }}</strong>
+        </div>
+        <div class="print-total">
+          <span>Total</span>
+          <strong>{{ formatCurrency(venta.costoTotal) }}</strong>
+        </div>
+      </article>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ventaService, type VentaFormData } from '@/services/ventaService'
 
@@ -204,7 +233,30 @@ const formatCurrency = (amount: number | null) =>
   Number(amount ?? 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })
 
 const formatDate = (value: string) => value ? new Date(value).toLocaleDateString('es-MX') : ''
-const imprimir = () => window.print()
+const PRINT_CLASS = 'printing-comprobante'
+
+const limpiarModoImpresion = () => {
+  document.body.classList.remove(PRINT_CLASS)
+}
+
+const imprimir = () => {
+  if (comprobantes.value.length === 0) {
+    mostrarMensaje('Selecciona al menos una venta para imprimir el comprobante.', 'info')
+    return
+  }
+
+  document.body.classList.add(PRINT_CLASS)
+
+  const limpiarDespuesDeImprimir = () => {
+    window.setTimeout(limpiarModoImpresion, 100)
+    window.removeEventListener('afterprint', limpiarDespuesDeImprimir)
+    window.removeEventListener('focus', limpiarDespuesDeImprimir)
+  }
+
+  window.addEventListener('afterprint', limpiarDespuesDeImprimir, { once: true })
+  window.addEventListener('focus', limpiarDespuesDeImprimir, { once: true })
+  window.setTimeout(() => window.print(), 0)
+}
 
 const mostrarMensaje = (texto: string, tipo: 'success' | 'error' | 'info' = 'info') => {
   mensaje.value = texto
@@ -321,3 +373,4 @@ onMounted(async () => {
   color: #0A2E5E;
 }
 </style>
+ 

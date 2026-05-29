@@ -1,231 +1,250 @@
-    /* ---- Encabezado de la página de inicio (Menú horizontal especial) ---- */
-    #Encabezado {
-        justify-content: center; 
-    }
-    .lista-de-opciones:hover{
-        cursor: pointer;
-        transform: scale(1.1);
-        transition: all 0.3s ease-in-out;
-    }
-    #lista-de-opciones a{
-        text-decoration: none;
-        color: white;
-    }
-    #lista-de-opciones{
-        text-align: center;
-        font-size: 22px;
-        padding: 0;
-        flex-shrink: 0;
-        list-style: none;
-    }
-    .lista-de-opciones{
-        display: inline-block;
-        margin: 0 15px;
-        padding: 10px;
-    }
-    .login-icon{
-        position: absolute;
-        display: flex;
-        align-items: center;
-        right: 20px;
-        top: 28%;
-        cursor: pointer;
-        align-content: center;
-    }
-
-    .login-icon a{
-        text-decoration: none;
-        color: white;
-        font-size: 18px;
-        margin-right: 10px;
-    }
-    .login-icon a img{
-        width: 35px;
-        height: 35px;
-        border: #ffffff 2px solid;
-        border-radius: 50%;
-    }
-
-    .login-icon img{
-        width: 100%;
-        height: 100%;
-    }
-
-    .login-icon a, .login-icon img{
-        transition: all 0.3s ease-in-out;
-    }
-    .login-icon:hover{
-    filter: opacity(0.8);
-    transition: all 0.3s ease-in-out;
+.inicio-page {
+    min-height: 100vh;
+    background: #f4f6f8;
 }
-.login-icon:hover a, .login-icon:hover img{
-        transform: scale(1.04);
-    }
-/* ---- Mas Auto (Banner de fondo) ---- */
-#Mas-Auto{
-    background-image: url("../Imagenes/Inicio/Mas-Autos.png");
+
+#Encabezado.inicio-header {
+    height: 88px;
+    justify-content: space-between;
+    gap: 22px;
+    padding: 0 clamp(16px, 4vw, 56px);
+    background: linear-gradient(90deg, rgba(10, 46, 94, 0.96), rgba(3, 69, 150, 0.94));
+    box-shadow: 0 10px 30px rgba(5, 25, 55, 0.18);
+}
+
+.brand-mark {
+    color: white;
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+#lista-de-opciones {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-align: center;
+    font-size: 0.98rem;
+}
+
+.lista-de-opciones {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+#lista-de-opciones a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 8px 12px;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+#lista-de-opciones a:hover {
+    background: rgba(255, 255, 255, 0.14);
+    transform: translateY(-1px);
+}
+
+.login-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.login-icon img {
+    width: 24px;
+    height: 24px;
+    filter: invert(1);
+}
+
+.login-icon:hover {
+    background: rgba(255, 255, 255, 0.18);
+    transform: translateY(-1px);
+}
+
+#Mas-Auto {
+    position: relative;
+    width: 100%;
+    height: clamp(520px, calc(100vh - 150px), 680px);
+    padding: clamp(44px, 8vw, 96px);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    background-image:
+        linear-gradient(90deg, rgba(3, 18, 38, 0.82) 0%, rgba(3, 18, 38, 0.54) 45%, rgba(3, 18, 38, 0.16) 100%),
+        url("../Imagenes/Inicio/Mas-Autos.png");
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    width: 100%;
-    height: 600px;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
-#Mas-Auto-Informacion{
-    font-size: clamp(2.5rem, 6vw, 4rem);
+
+.hero-copy {
+    position: relative;
+    z-index: 1;
+    width: min(680px, 100%);
     color: white;
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+    text-align: left;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
 }
 
-
-#Ver-mas{
-    display: inline-block;
-    color: whitesmoke!important;
-    border-radius: 50px;
-    width: 280px;
-    height: 80px;
-    line-height: 60px;
-    padding: 10px;
-    cursor: pointer;
-    user-select: none;
-    text-decoration: none;
-    font-size: 1.8rem;
-    margin-top: 20px;
+.hero-copy h1 {
+    max-width: 9ch;
+    margin: 0;
+    font-size: clamp(3rem, 7vw, 6.4rem);
+    line-height: 0.95;
+    font-weight: 900;
 }
 
-
-/* ---- Algunos Autos Muestras (Layout de carruseles) ---- */
-#Vehiculos-Marcas-Muestras{
-    background: white;
-    padding: 50px 20px;
-    text-align: center;
-}
-
-#Contenedor-General-Vehiculos {
+.hero-actions {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 30px;
-    max-width: 1600px;
-    margin: 40px auto 0;
+    gap: 14px;
+    margin-top: 34px;
 }
 
-.tarjeta-marca {
-    flex-basis: 400px;
-    flex-grow: 1;
-    max-width: 450px;
-    padding: 20px;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 15px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.tarjeta-marca h3 {
-    margin-bottom: 15px;
-    font-size: 1.8rem;
-    color: #333;
-}
-
-.carousel-item {
-    aspect-ratio: 4 / 3;
-    background-color: #ffffff; 
-    border-radius: 8px;
-}
-
-.carousel-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain; 
-    border-radius: 8px;
-}
-
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-    filter: invert(1);
-}
-
-/* ---- Nuestras Marcas (Banner de logos) ---- */
-#Nuestras-Marcas{
-    background-image: url("../Imagenes/Inicio/brand-bg.png");
-    background-position: center;
-    background-size: cover;
-    color: white;
-    width: 100%;
-    min-height: 400px;
-    text-align: center;
-    padding: 50px 20px;
-}
-#Nuestras-Marcas h2{
-    font-size: 3rem;
-    padding-top: 20px;
-}
-#Marcas{
-    padding-top: 80px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 40px;
-}
-.logo img{
-    width: 120px;
+#Ver-mas {
+    width: auto;
+    min-width: 180px;
     height: auto;
-}
-.logo{
-    display: inline-block;
-    list-style: none;
-}
-.logo:hover{
-    cursor: pointer;
-    transform: scale(1.15);
-    transition: all 0.3s ease-in-out;
+    line-height: 1.2;
+    margin: 0;
+    color: #172033 !important;
+    text-align: center;
+    text-decoration: none;
 }
 
-#admin-link{
+.btn-ghost {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.38) !important;
+    text-decoration: none;
+}
+
+.btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-1px);
+}
+
+.brand-strip {
+    min-height: 118px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: clamp(22px, 5vw, 64px);
+    padding: 24px clamp(16px, 5vw, 64px);
+    background: white;
+    border-bottom: 1px solid #dde4ec;
+}
+
+.brand-strip img {
+    width: clamp(80px, 10vw, 128px);
+    max-height: 58px;
+    object-fit: contain;
+    filter: saturate(0.92);
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.brand-strip img:hover {
+    transform: translateY(-2px);
+    filter: saturate(1.08);
+}
+
+#admin-link {
     position: fixed;
-    bottom:  60px;
+    bottom: 60px;
     right: 60px;
-    background-color: #DEC521;
-    padding: 10px 15px;
-    border-radius: 50%;
     width: 60px;
     height: 60px;
+    padding: 10px 15px;
+    border-radius: 50%;
+    background-color: #dec521;
     z-index: 900;
 }
-#admin-link img{
+
+#admin-link img {
     width: 100%;
-    filter: invert(1);
     height: 100%;
-    
+    filter: invert(1);
 }
-#admin-link:hover{
-    background-color: #B6A11B;
+
+#admin-link:hover {
+    background-color: #b6a11b;
     transform: scale(1.1);
     transition: all 0.3s ease-in-out;
 }
 
-.typewriter{
-  overflow: hidden; 
-  border-right: .15em solid #DEC521; /* The typwriter cursor */
-  white-space: nowrap;
-  margin: 0 auto; 
-  animation: 
-    typing 3.5s steps(40, end),
-    blink-caret .75s step-end 10 forwards;
+@media (max-width: 920px) {
+    #Encabezado.inicio-header {
+        height: auto;
+        min-height: 92px;
+        flex-wrap: wrap;
+        padding: 14px 18px;
+    }
+
+    .brand-mark {
+        width: 100%;
+        text-align: center;
+    }
+
+    #lista-de-opciones {
+        order: 3;
+        width: 100%;
+        flex-wrap: wrap;
+        font-size: 0.92rem;
+    }
+
+    .login-icon {
+        margin-left: auto;
+    }
+
+    #Mas-Auto {
+        height: auto;
+        min-height: 560px;
+        padding: 54px 22px;
+        align-items: flex-end;
+    }
+
+    .hero-copy h1 {
+        max-width: 100%;
+    }
 }
 
-/* The typing effect */
-@keyframes typing {
-  from { width: 0 }
-  to { width: 100% }
-}
+@media (max-width: 560px) {
+    #lista-de-opciones a,
+    .login-icon {
+        min-height: 38px;
+        padding: 7px 9px;
+    }
 
-/* The typewriter cursor effect */
-@keyframes blink-caret {
-  from, to { border-color: transparent }
-  50% { border-color: #DEC521; }
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+    }
+
 }

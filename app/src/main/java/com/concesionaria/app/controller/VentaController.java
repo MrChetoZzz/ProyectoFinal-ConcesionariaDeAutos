@@ -6,7 +6,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -80,11 +82,19 @@ public class VentaController {
             ));
     }
 
+    @GetMapping("/{id}")
+    public VentaDto obtenerVentaPorId(@PathVariable int id) {
+        return obtenerVenta(id);
+    }
+
     @PostMapping
     @Transactional
     public VentaDto registrarVenta(@RequestBody VentaRequest request) {
         if (request.idCliente() == null || request.idVehiculo() == null || request.idTipoPago() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente, vehiculo y tipo de pago son obligatorios.");
+        }
+        if (!vehiculoDisponible(request.idVehiculo())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El vehiculo no esta disponible para venta.");
         }
 
         var costoTotal = request.costoTotal() != null ? request.costoTotal() : obtenerCostoVehiculo(request.idVehiculo());
@@ -113,6 +123,26 @@ public class VentaController {
             """, idVenta, request.idTipoPago(), monto, fecha);
 
         return obtenerVenta(idVenta);
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public Mensaje cancelarVenta(@PathVariable int id) {
+        var updated = jdbcTemplate.update("""
+            UPDATE Venta
+            SET IdVentaEstado = 3
+            WHERE IdVenta = ?
+              AND IdVentaEstado <> 3
+            """, id);
+
+        if (updated == 0) {
+            if (!existeVenta(id)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Venta no encontrada.");
+            }
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "La venta ya estaba cancelada.");
+        }
+
+        return new Mensaje("Venta cancelada correctamente.");
     }
 
     private VentaDto obtenerVenta(int idVenta) {
@@ -151,15 +181,43 @@ public class VentaController {
     }
 
     private BigDecimal obtenerCostoVehiculo(int idVehiculo) {
-        var costo = jdbcTemplate.queryForObject(
+        var costos = jdbcTemplate.queryForList(
             "SELECT Costo FROM Vehiculo WHERE IdVehiculo = ?",
             BigDecimal.class,
             idVehiculo
         );
+        if (costos.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vehiculo no encontrado.");
+        }
+        var costo = costos.get(0);
         if (costo == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El vehiculo no tiene costo registrado.");
         }
         return costo;
+    }
+
+    private boolean vehiculoDisponible(int idVehiculo) {
+        var disponibles = jdbcTemplate.queryForObject("""
+            SELECT COUNT(1)
+            FROM Vehiculo v
+            WHERE v.IdVehiculo = ?
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM Venta venta
+                  WHERE venta.IdVehiculo = v.IdVehiculo
+                    AND venta.IdVentaEstado = 2
+              )
+            """, Integer.class, idVehiculo);
+        return disponibles != null && disponibles > 0;
+    }
+
+    private boolean existeVenta(int idVenta) {
+        var total = jdbcTemplate.queryForObject(
+            "SELECT COUNT(1) FROM Venta WHERE IdVenta = ?",
+            Integer.class,
+            idVenta
+        );
+        return total != null && total > 0;
     }
 
     private int obtenerPrimerUsuarioActivo() {
@@ -208,6 +266,9 @@ public class VentaController {
     }
 
     public record TipoPagoDto(Integer id, String tipoPago) {
+    }
+
+    public record Mensaje(String mensaje) {
     }
 
     public record VentaRequest(

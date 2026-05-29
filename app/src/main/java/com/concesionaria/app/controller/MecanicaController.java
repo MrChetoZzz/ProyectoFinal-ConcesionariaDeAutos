@@ -127,11 +127,19 @@ public class MecanicaController {
             ));
     }
 
+    @GetMapping("/reparaciones/{id}")
+    public ReparacionDto obtenerReparacionPorId(@PathVariable int id) {
+        return obtenerReparacion(id);
+    }
+
     @PostMapping("/reparaciones")
     @Transactional
     public ReparacionDto registrarReparacion(@RequestBody ReparacionRequest request) {
         if (request.idCliente() == null || request.idVehiculo() == null || isBlank(request.descripcionProblema())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente, vehiculo y problema son obligatorios.");
+        }
+        if (request.costoEstimado() != null && request.costoEstimado().signum() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El costo estimado no puede ser negativo.");
         }
 
         var idMecanico = request.idMecanico() != null ? request.idMecanico() : obtenerPrimerMecanicoActivo();
@@ -184,22 +192,22 @@ public class MecanicaController {
         var costoEstimado = request.costoEstimado();
         var descripcionProblema = request.descripcionProblema();
 
-        var sqlBuilder = new StringBuilder("""
-            UPDATE VehiculoReparacion
-            SET """);
-
+        var clauses = new java.util.ArrayList<String>();
         var updates = new java.util.ArrayList<Object>();
         if (idMecanico != null) {
+            clauses.add("IdMecanico = ?");
             updates.add(idMecanico);
-            sqlBuilder.append("IdMecanico = ?, ");
         }
         if (costoEstimado != null) {
+            if (costoEstimado.signum() < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El costo estimado no puede ser negativo.");
+            }
+            clauses.add("CostoEstimado = ?");
             updates.add(costoEstimado);
-            sqlBuilder.append("CostoEstimado = ?, ");
         }
         if (descripcionProblema != null && !descripcionProblema.isBlank()) {
+            clauses.add("DescripcionProblema = ?");
             updates.add(descripcionProblema);
-            sqlBuilder.append("DescripcionProblema = ?, ");
         }
 
         if (updates.isEmpty()) {
@@ -207,9 +215,10 @@ public class MecanicaController {
         }
 
         updates.add(id);
-        sqlBuilder.append("FechaModificacion = SYSUTCDATETIME() WHERE IdVehiculoReparacion = ? AND IdReparacionEstado IN (1, 2)");
+        var sql = "UPDATE VehiculoReparacion SET " + String.join(", ", clauses)
+            + " WHERE IdVehiculoReparacion = ? AND IdReparacionEstado IN (1, 2)";
 
-        var updated = jdbcTemplate.update(sqlBuilder.toString(), updates.toArray());
+        var updated = jdbcTemplate.update(sql, updates.toArray());
 
         if (updated == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Reparacion activa no encontrada.");
@@ -221,6 +230,9 @@ public class MecanicaController {
     @PatchMapping("/reparaciones/{id}/completar")
     public Mensaje completarReparacion(@PathVariable int id, @RequestBody(required = false) CompletarRequest request) {
         var costoFinal = request == null ? null : request.costoFinal();
+        if (costoFinal != null && costoFinal.signum() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El costo final no puede ser negativo.");
+        }
         var updated = jdbcTemplate.update("""
             UPDATE VehiculoReparacion
             SET IdReparacionEstado = 3,

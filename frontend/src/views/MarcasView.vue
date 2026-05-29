@@ -24,9 +24,10 @@
             </article>
             <article v-for="vehiculo in vehiculosPorMarca(marca)" :key="vehiculo.id" class="card">
               <img 
-                :src="vehiculo.imagenPrincipal || brandLogos[vehiculo.marca] || defaultLogo" 
+                :src="obtenerRutaImagen(vehiculo)" 
                 class="card-img-top vehiculo-img" 
                 :alt="`Foto de ${vehiculo.marca} ${vehiculo.modelo}`"
+                @error="usarLogoFallback($event, vehiculo.marca)"
               >
               <div class="card-body">
                 <h5 class="card-title">{{ vehiculo.marca }} {{ vehiculo.modelo }}</h5>
@@ -52,7 +53,6 @@ import HondaLogo from '@/assets/Imagenes/Inicio/Honda.png'
 import NissanLogo from '@/assets/Imagenes/Inicio/NissanLogo.png'
 import ToyotaLogo from '@/assets/Imagenes/Inicio/ToyotaLogo.png'
 
-// MODIFICACIÓN: Se agrega imagenPrincipal al contrato
 interface Vehiculo {
   id: number
   marca: string
@@ -86,6 +86,17 @@ const vehiculosPorMarca = (marca: string) => vehiculos.value.filter((vehiculo) =
 const formatCurrency = (amount: number | null) =>
   Number(amount ?? 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })
 
+const obtenerRutaImagen = (vehiculo: Vehiculo) =>
+  vehiculo.imagenPrincipal || brandLogos[vehiculo.marca] || defaultLogo
+
+const usarLogoFallback = (event: Event, marca: string) => {
+  const image = event.target as HTMLImageElement
+  const fallback = brandLogos[marca] || defaultLogo
+  if (image.src !== fallback) {
+    image.src = fallback
+  }
+}
+
 const cargarVehiculos = async () => {
   try {
     const response = await fetch('/api/vehiculos?sort=Marca-Ascendente')
@@ -109,7 +120,6 @@ onMounted(cargarVehiculos)
   min-height: 150px;
 }
 
-/* NUEVA CLASE: Evita que las fotos rompan el diseño de las tarjetas */
 .vehiculo-img {
   object-fit: cover;
   height: 200px;

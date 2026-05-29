@@ -12,6 +12,7 @@ export interface Vehiculo {
   condicion: string
   fechaRegistro: string
   disponible: boolean
+  imagenPrincipal?: string | null
 }
 
 export interface VehiculoFormData {

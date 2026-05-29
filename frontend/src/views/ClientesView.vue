@@ -315,3 +315,5 @@ onMounted(fetchClientes)
   color: #0A2E5E;
 }
 </style>
+
+ 
