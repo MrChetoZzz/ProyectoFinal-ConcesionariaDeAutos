@@ -416,9 +416,7 @@ public class VehiculoController {
     @PostMapping
     @Transactional
     public VehiculoDto crearVehiculo(@RequestBody VehiculoRequest request) {
-        if (isBlank(request.marca()) || isBlank(request.modelo()) || request.anioModelo() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Marca, modelo y anio son obligatorios.");
-        }
+        validarVehiculoRequest(request);
 
         var condicionId = request.idVehiculoCondicion() != null
             ? request.idVehiculoCondicion()
@@ -447,6 +445,7 @@ public class VehiculoController {
     @Transactional
     public VehiculoDto actualizarVehiculo(@PathVariable int id, @RequestBody VehiculoRequest request) {
         obtenerVehiculo(id);
+        validarVehiculoRequest(request);
 
         var condicionId = request.idVehiculoCondicion() != null
             ? request.idVehiculoCondicion()
@@ -454,8 +453,7 @@ public class VehiculoController {
 
         var updated = jdbcTemplate.update("""
             UPDATE Vehiculo
-            SET Marca = ?, Modelo = ?, AnioModelo = ?, Placas = ?, NumeroSerie = ?, Costo = ?, IdVehiculoCondicion = ?,
-                FechaModificacion = SYSUTCDATETIME()
+            SET Marca = ?, Modelo = ?, AnioModelo = ?, Placas = ?, NumeroSerie = ?, Costo = ?, IdVehiculoCondicion = ?
             WHERE IdVehiculo = ?
             """, request.marca(), request.modelo(), request.anioModelo(),
             blankToNull(request.placas()), blankToNull(request.numeroSerie()),
@@ -469,20 +467,49 @@ public class VehiculoController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public Mensaje desactivarVehiculo(@PathVariable int id) {
         obtenerVehiculo(id);
 
-        var updated = jdbcTemplate.update("""
-            UPDATE Vehiculo
-            SET FechaModificacion = SYSUTCDATETIME()
-            WHERE IdVehiculo = ?
-            """, id);
+        if (tieneReferencias(id)) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "El vehiculo tiene ventas o reparaciones relacionadas; no se puede eliminar fisicamente."
+            );
+        }
+
+        jdbcTemplate.update("DELETE FROM VehiculoImagen WHERE IdVehiculo = ?", id);
+        var updated = jdbcTemplate.update("DELETE FROM Vehiculo WHERE IdVehiculo = ?", id);
 
         if (updated == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehiculo no encontrado.");
         }
 
         return new Mensaje("Vehiculo eliminado correctamente.");
+    }
+
+    private boolean tieneReferencias(int id) {
+        var referencias = jdbcTemplate.queryForObject("""
+            SELECT
+                (SELECT COUNT(1) FROM Venta WHERE IdVehiculo = ?) +
+                (SELECT COUNT(1) FROM VehiculoReparacion WHERE IdVehiculo = ?)
+            """, Integer.class, id, id);
+        return referencias != null && referencias > 0;
+    }
+
+    private static void validarVehiculoRequest(VehiculoRequest request) {
+        if (isBlank(request.marca()) || isBlank(request.modelo()) || request.anioModelo() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Marca, modelo y anio son obligatorios.");
+        }
+        if (request.anioModelo() < 1900 || request.anioModelo() > 2100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El anio del vehiculo debe estar entre 1900 y 2100.");
+        }
+        if (request.costo() != null && request.costo().signum() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El costo no puede ser negativo.");
+        }
+        if (request.idVehiculoCondicion() != null && request.idVehiculoCondicion() != 1 && request.idVehiculoCondicion() != 2) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La condicion del vehiculo no es valida.");
+        }
     }
 
     private static String orderBy(String sort) {
