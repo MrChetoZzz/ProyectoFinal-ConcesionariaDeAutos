@@ -39,6 +39,26 @@ public class ClienteController {
         return repo.findResumenes();
     }
 
+    @GetMapping("/{id}")
+    public ClienteResumenDto obtenerCliente(@PathVariable int id) {
+        return jdbcTemplate.query("""
+            SELECT
+                c.IdCliente,
+                p.Nombre,
+                p.Domicilio,
+                c.EstaActivo
+            FROM Cliente c
+            INNER JOIN Persona p ON p.IdPersona = c.IdPersona
+            WHERE c.IdCliente = ? AND c.EstaActivo = 1
+            """, (rs, rowNum) -> new ClienteResumenDto(
+                rs.getInt("IdCliente"),
+                rs.getString("Nombre"),
+                rs.getString("Domicilio"),
+                rs.getBoolean("EstaActivo")
+            ), id).stream().findFirst()
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrado."));
+    }
+
     @PostMapping
     @Transactional
     public Mensaje crearCliente(@RequestBody ClienteRequest request) {
@@ -72,14 +92,19 @@ public class ClienteController {
     @PutMapping("/{id}")
     @Transactional
     public Mensaje actualizarCliente(@PathVariable int id, @RequestBody ClienteRequest request) {
+        if (isBlank(request.nombre())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre es obligatorio.");
+        }
+
+        var nombreCompleto = joinParts(request.nombre(), request.apellidoPaterno(), request.apellidoMaterno());
         var domicilio = buildDomicilio(request.colonia(), request.calle(), request.numExt(), request.telefono());
         var updated = jdbcTemplate.update("""
             UPDATE p
-            SET p.Domicilio = ?, p.FechaModificacion = SYSUTCDATETIME()
+            SET p.Nombre = ?, p.Domicilio = ?, p.FechaModificacion = SYSUTCDATETIME()
             FROM Persona p
             INNER JOIN Cliente c ON c.IdPersona = p.IdPersona
             WHERE c.IdCliente = ? AND c.EstaActivo = 1
-            """, domicilio, id);
+            """, nombreCompleto, domicilio, id);
 
         if (updated == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrado.");

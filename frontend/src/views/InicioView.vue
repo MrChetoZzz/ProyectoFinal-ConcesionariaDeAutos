@@ -1,6 +1,8 @@
 <template>
   <div class="inicio-page">
-    <div id="Encabezado" class="animate__animated animate__fadeInDown">
+    <div id="Encabezado" class="inicio-header animate__animated animate__fadeInDown">
+      <router-link to="/" class="brand-mark">ALAFE</router-link>
+
       <ul id="lista-de-opciones" class="animate__animated animate__fadeInUp animate__delay-1s">
         <template v-if="user.isLoggedIn">
           <li v-if="user.rol === 'admin'" class="lista-de-opciones"><router-link to="/gestion-vehiculos">Gestion de Vehiculos</router-link></li>
@@ -12,19 +14,30 @@
         <li v-else class="lista-de-opciones"><router-link to="/marcas">Catalogo</router-link></li>
       </ul>
 
-      <div class="login-icon animate__animated animate__fadeInUp animate__delay-1s" @click="toggleLoginModal">
-        <a v-if="user.isLoggedIn" @click.stop="cerrarSesion">Cerrar Sesion</a>
-        <a v-else>Iniciar Sesion</a>
+      <button type="button" class="login-icon animate__animated animate__fadeInUp animate__delay-1s" @click="toggleLoginModal">
+        <span v-if="user.isLoggedIn" @click.stop="cerrarSesion">Cerrar Sesion</span>
+        <span v-else>Iniciar Sesion</span>
         <img src="@/assets/Imagenes/Iconos/user_icon.svg" alt="Usuario">
-      </div>
+      </button>
     </div>
 
-    <div id="Mas-Auto" class="animate__animated animate__fadeInDown">
-      <div id="Mas-Auto-Informacion">
-        <h2 class="typewriter">Explora el carro de tus suenos</h2>
-        <router-link to="/marcas" id="Ver-mas" class="btn-accent">Ver Mas</router-link>
+    <section id="Mas-Auto" class="inicio-hero animate__animated animate__fadeInDown">
+      <div id="Mas-Auto-Informacion" class="hero-copy">
+        <h1>ALAFE</h1>
+        <div class="hero-actions">
+          <router-link :to="rutaPrincipal" id="Ver-mas" class="btn btn-accent">{{ textoAccionPrincipal }}</router-link>
+          <router-link to="/marcas" class="btn btn-ghost">Ver catalogo</router-link>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <section class="brand-strip" aria-label="Marcas disponibles">
+      <img src="@/assets/Imagenes/Inicio/NissanLogo.png" alt="Nissan">
+      <img src="@/assets/Imagenes/Inicio/ToyotaLogo.png" alt="Toyota">
+      <img src="@/assets/Imagenes/Inicio/FordLogo.png" alt="Ford">
+      <img src="@/assets/Imagenes/Inicio/Honda.png" alt="Honda">
+      <img src="@/assets/Imagenes/Inicio/DodgeLogo.png" alt="Dodge">
+    </section>
 
     <div v-if="showLoginModal && !user.isLoggedIn" class="modal-overlay active">
       <div class="login-page-container">
@@ -45,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 
 type Rol = 'admin' | 'vendedor' | 'mecanico' | ''
 
@@ -55,6 +68,15 @@ const user = reactive({
 })
 
 const showLoginModal = ref(false)
+
+const rutaPrincipal = computed(() => {
+  if (!user.isLoggedIn) return '/marcas'
+  if (user.rol === 'mecanico') return '/mecanica'
+  if (user.rol === 'vendedor') return '/ventas'
+  return '/gestion-vehiculos'
+})
+
+const textoAccionPrincipal = computed(() => user.isLoggedIn ? 'Ir al panel' : 'Explorar autos')
 
 const toggleLoginModal = () => {
   showLoginModal.value = !showLoginModal.value
